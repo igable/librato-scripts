@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+
+
+#
+# Author: Ian Gable <igable@uvic.ca>
+#
+# Check the number of unread email in an IMAP inbox
+# and pushes that number to Librato Metrics
+#
+
+import getpass
+import imaplib
+import sys
+import time
+from imaplib import IMAP4
+from librato import LibratoConnection
+from optparse import OptionParser
+
+
+def pushmessages(username, password, imap_server,librato_user,api_key, bequiet):
+    try:
+        imap = imaplib.IMAP4_SSL(imap_server,'993')
+        imap.login(username,password)
+
+        # Default to looking at the inbox for now
+        imap.select('INBOX')
+    
+        typ, data = imap.search(None, 'UNSEEN')
+
+        num_messages = str(len(data[0].split()))
+        
+        if not bequiet:
+            print "Unread Messages:" + str(len(data[0].split()))
+    
+        imap.close()
+        imap.logout()
+    except IMAP4.error as e:
+        print str(e)
+    
+    try:
+        connection = LibratoConnection(librato_user,api_key)
+        gauge = connection.get_or_create_gauge('unread_email',description="Inbox Unread Email")
+        gauge.add(num_messages)
+    except:
+        print "Some librato error happend"
+        sys.exit(1)
+
+if __name__=='__main__':
+ 
+    parser = OptionParser(usage="%prog -k INFILE -o OUTFILE",version = "%prog 0.1")
+    parser.add_option("-u", "--username", dest="username",
+                                    help="IMAP username", metavar="USERNAME")
+    parser.add_option("-l","--librato-user", dest="librato_user",
+                                    help="Librato username, usually an email address", metavar="LIBRATOUSER")
+    parser.add_option("-k", "--api-key", dest="api_key",
+                                    help="Librato API Key", metavar="APIKEY")
+    parser.add_option("-i","--imap-server",dest="imap_server",
+                                    help="IMAP server to check", metavar="IMAPSERVER")
+    parser.add_option("-p","--polling-frequency",dest="polling",
+                                    help="The time in seconds between polling the IMAP server", 
+                                    metavar="POLLINGFREQUENCY", default=600)
+    parser.add_option("-q","--quiet", action="store_true", dest="quiet", 
+                                    help="Set no output to the STDOUT", default=False)
+    (options, args) = parser.parse_args()
+
+
+    missing_arguments = False
+    if not options.username and options.imap_server and options.librato_user and options.api_key:
+        print("You are missing some required arguments\n")
+        parser.print_help()
+        parser.error("Missing some arguments so exiting")
+        missing_options = True
+
+
+    password = getpass.getpass("IMAP Password:")
+
+    username = options.username
+    imap_server = options.imap_server
+    librato_user = options.librato_user
+    api_key = options.api_key
+    polling_freq = float(options.polling)
+    bequiet = options.quiet
+
+    try:
+        while True:
+            pushmessages(username,password, imap_server,librato_user,api_key, bequiet)
+            time.sleep(polling_freq)
+    except (SystemExit, KeyboardInterrupt):
+        sys.exit()
