@@ -15,16 +15,13 @@ In order to use this script you need a Librato account and API key.
 
 ### Installation
 
-Right now the PyPI python wrapper for the Librato API is a touch broken.
-So for right now to install do the following:
+The install requires the python librato package from PyPI. You can install this with pip. If you don't have pip install that first.
 
-    $ mkdir script
-    $ cd script
-    $ git clone git://github.com/millarm/librato.git
-    $ cd librato
-    $ python setup.py install
-    $ cd ..
+Basic steps:
+
+    $ pip install librato
     $ git clone git://github.com/igable/librato-scripts.git
+    $ cd librato-scripts
     $ python setup.py install
  
 Hopefully this will get better.

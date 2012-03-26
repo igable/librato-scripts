@@ -14,6 +14,7 @@ import sys
 import time
 from imaplib import IMAP4
 from librato import LibratoConnection
+from  librato.exceptions import NotFound
 from optparse import OptionParser
 
 
@@ -37,13 +38,18 @@ def pushmessages(username, password, imap_server,librato_user,api_key, bequiet):
     except IMAP4.error as e:
         print str(e)
     
+    connection = LibratoConnection(librato_user,api_key)
+
     try:
-        connection = LibratoConnection(librato_user,api_key)
-        gauge = connection.get_or_create_gauge('unread_email',description="Inbox Unread Email")
-        gauge.add(num_messages)
-    except:
-        print "Some librato error happend"
-        sys.exit(1)
+        # line below uses the https://github.com/millarm/librato fork syntax (not in PyPI)
+        # gauge = connection.get_or_create_gauge('unread_email',description="Inbox Unread Email")
+        gauge = connection.get_gauge('unread_email')
+    except NotFound:
+        gauge = connection.create_gauge('unread_email',description='Unread Email')
+
+    # line below uses the https://github.com/millarm/librato fork syntax (not in PyPI)
+    #gauge = connection.get_or_create_gauge('unread_email',description="Inbox Unread Email")
+    gauge.add(num_messages)
 
 if __name__=='__main__':
  

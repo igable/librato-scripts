@@ -18,7 +18,7 @@ setup(name="librato-scripts",
       author_email="igable@uvic.ca",
       scripts=['librato-imap'],
       install_requires=[
-       "librato>=0.1"],
+       "librato>=0.2"],
       classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
