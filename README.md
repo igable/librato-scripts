@@ -15,12 +15,12 @@ In order to use this script you need a Librato account and API key.
 
 ### Installation
 
-Right now both the PyPI and GitHub mirror of python wrapper for the Librato API
-are a touch broken. So for right now to install to the following:
+Right now the PyPI python wrapper for the Librato API is a touch broken.
+So for right now to install do the following:
 
     $ mkdir script
     $ cd script
-    $ git clone git://github.com/igable/librato.git
+    $ git clone git://github.com/millarm/librato.git
     $ cd librato
     $ python setup.py install
     $ cd ..
